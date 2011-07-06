@@ -1,0 +1,27 @@
+{
+    "name": "jQuery-OpenXTag",
+    "version": 1.0,
+    "author": [
+        "Nikolay Morev <kolia@denivip.ru>"
+        ],
+    "abstract": "Insert OpenX ad tags using jQuery.",
+    "license": "mit",
+    "distribution_type": "plugin",
+    "requires": {
+        "jQuery": ""
+    },
+    "provides": {
+        "jQuery.openxtag": {
+            "version": 1.0,
+            "file": "jquery.openxtag.js"
+        }
+    },
+    "keywords": [
+        "openx", "ads", "asyncronous", "invocation"
+        ],
+    "meta-spec": {
+        "version": 1.3,
+        "url": "http://module-build.sourceforge.net/META-spec-v1.3.html"
+    },
+    "generated_by": "Nikolay Morev"
+}
