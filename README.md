@@ -60,6 +60,18 @@ $('.banner').openxtag('zone', function () {
 <div class="banner {zoneID: 1, source: 'zone2'}"></div>
 ```
 
+Load ads using [Single Page Call](http://www.openx.org/docs/tutorials/single+page+call) 
+request. When using this method, multiple ad tags on page can be loaded with a
+single request to server.  The limitation of this method is if you use metadata
+parameters, only zoneID parameter can be set per element. All other parameters
+are set per ad request.
+
+```javascript
+$('.banner').openxtag('spc', function () {
+    console.log('loaded ad');
+});
+```
+
 Also see sample HTML pages in examples/
 
 TODO
