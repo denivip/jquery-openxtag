@@ -33,7 +33,7 @@ core: jquery min lint
 
 ${DIST_DIR}:
 	@@mkdir -p ${DIST_DIR}
-	@@cp -r README.md examples ${DIST_DIR}
+	@@cp -r README.md lib examples ${DIST_DIR}
 
 jquery: ${JQ}
 
@@ -71,7 +71,7 @@ ${JQ_MIN}: ${JQ}
 ${JQ_CC}: ${JQ}
 	@@echo "Closure compiling plugin" ${JQ_CC}; \
 	${CLOSURE_COMPILER} --compilation_level ADVANCED_OPTIMIZATIONS --js ${JQ} \
-	--externs examples/jquery-1.6.2rc1-ab1504f.min.js --externs examples/jquery.metadata.js \
+	--externs lib/jquery-1.6.2rc1-ab1504f.min.js --externs lib/jquery.metadata.js \
 	--warning_level QUIET > ${JQ_CC};
 
 clean:
