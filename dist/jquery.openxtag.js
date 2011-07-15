@@ -3,8 +3,8 @@
  *
  * Tested with OpenX Community Edition 2.8.8-rc6
  *
- * @version 1.0
- * @date Fri Jul 15 12:53:31 2011 +0400
+ * @version 1.1
+ * @date Fri Jul 15 14:27:52 2011 +0400
  * @requires jQuery
  * @url http://plugins.jquery.com/project/openxtag
  *
@@ -28,6 +28,9 @@
         'deliverySSL': null,
         'jsTagScript': 'ajs.php',
         'spcTagScript': 'spc.php',
+        'iframeTagScript': 'afr.php',
+        'adViewScript': 'avw.php',
+        'clickScript': 'ck.php',
         'charset': 'UTF-8',
         'zoneID': null,
         'target': undefined,
@@ -35,6 +38,11 @@
         'blockcampaign': undefined, // bool option
         'block': undefined, // bool option
         'forceAsync': false, // not compatible with block(campaign) parameters
+        'refresh': undefined,
+        'resize': undefined,
+        'allowtransparent': undefined,
+        'width': undefined,
+        'height': undefined,
         'extra': undefined // object of key-value pairs for custom parameters
     };
 
@@ -139,6 +147,14 @@
             data['referer'] = document.referrer;
         }
 
+        // fixing http://bugs.jquery.com/ticket/8653
+
+        for (var key in data) {
+            if (typeof data[key] == 'undefined') {
+                delete data[key];
+            }
+        }
+
         return data;
     }
     // }}} _buildStandardRequestParameters
@@ -194,8 +210,66 @@
     };
     // }}} jsZone
 
-    var iFrameZone = function (zoneID, options, success) {
-        // TODO implement iFrame zone tag
+    var iFrameZone = function (zoneID, settings, success) {
+        return this.each(function () {
+            var $this = $(this);
+
+            var thesettings = $.extend({}, settings);
+            if (typeof $.metadata != 'undefined') {
+                thesettings = $.extend(thesettings, $this.metadata());
+            }
+
+            _validateSettings(thesettings);
+
+            var zoneID = thesettings['zoneID'];
+            if (zoneID == null) {
+                $.error('please set "zoneID" option for openxtag iframe');
+            }
+
+            var data = _buildStandardRequestParameters(thesettings);
+            data['zoneid'] = zoneID;
+            data['cb'] = Math.floor(Math.random()*99999999999);
+
+            if (typeof thesettings['refresh'] != 'undefined') {
+                data['refresh'] = thesettings['refresh'];
+            }
+
+            if (typeof thesettings['resize'] != 'undefined') {
+                data['resize'] = thesettings['resize'] ? 1 : 0;
+            }
+
+            if (typeof thesettings['width'] == 'undefined') {
+                $.error('openxtag: width parameter is required for iframe tag');
+            }
+            var width = thesettings['width'];
+
+            if (typeof thesettings['height'] == 'undefined') {
+                $.error('openxtag: height parameter is required for iframe tag');
+            }
+            var height = thesettings['height'];
+
+            var allowtransparent = '';
+            if (typeof thesettings['allowtransparent'] != 'allowtransparent' && 
+                thesettings['allowtransparent']) {
+                allowtransparent = ' allowtransparency="true" ';
+            }
+
+            var uniqid = 'a' + Math.floor(Math.random()*999999);
+
+            var target = (typeof thesettings['target'] == 'undefined' ? '_blank' : thesettings['target']);
+
+            var delivery = (location.protocol == 'https:' ? thesettings['deliverySSL'] : thesettings['delivery']);
+            var scriptURL = delivery + '/' + thesettings['iframeTagScript'];
+            var clickURL = delivery + '/' + thesettings['clickScript'];
+            var adViewURL = delivery + '/' + thesettings['adViewScript'];
+
+            $this.append("<iframe id='" + uniqid + "' name='" + uniqid + "' src='" + scriptURL + "?" + $.param(data) + 
+            "' frameborder='0' scrolling='no' width='" + width + "' height='" + height + 
+            "'" + allowtransparent + "><a href='" + clickURL + "?n=" + uniqid + "&amp;cb=" + data['cb'] + "' target='" + 
+            target + "'><img src='" + adViewURL + "?zoneid=" + zoneID + "&amp;cb=" + 
+            data['cb'] + "&amp;n=" + uniqid + "' border='0' alt='' /></a></iframe>");
+
+        });
     };
 
     // {{{ function spcTag(zoneID, settings, success) { ... }
@@ -260,7 +334,8 @@
     var fnMethods = {
         'zone': jsZone,
         'jsZone': jsZone,
-        'spc': spcTag
+        'spc': spcTag,
+        'iframe': iFrameZone
     };
 
     // {{{ function $.fn.openxtag(method) { ... }
@@ -275,8 +350,8 @@
      *
      * @descr Loads ads into elements
      * @param string type Type of ad invocation tag. Currently supported types
-     * are 'jsZone' for JavaScript invocation tag and 'spc' for Single Page Call
-     * tag. "zone" is alias for "jsZone".
+     * are 'jsZone' for JavaScript invocation tag, 'spc' for Single Page Call
+     * tag, and 'iframe' for iFrame tag. "zone" is alias for "jsZone".
      * @param number zoneID ID of OpenX zone to load banner from.
      * @param object options An object containing settings to override the
      * defaults (see init).
@@ -326,6 +401,16 @@
      *   (see file/singlepagecall option in OpenX configuration). Default:
      *   'spc.php'.
      *
+     *   iframeTagScript: Name of OpenX script to make IFrame tag request (see
+     *   file/frame option in OpenX configuration). Default: 'afr.php'.
+     *
+     *   clickScript: Name of OpenX script to log ad clicks (see file/click
+     *   option in OpenX configuration). Required for IFrame tag. Default:
+     *   'ck.php'.
+     *
+     *   adViewScript: Name of OpenX script to log ad views for IFrame tag.
+     *   Default: 'avw.php'.
+     *
      *   charset: Character set of web page. Default: 'UTF-8'.
      *
      *   zoneID: ID of OpenX zone to load ads from (see Inventory > Zones in
@@ -347,6 +432,19 @@
      *   are still loaded asynchronously with page loading. Setting this option
      *   to true is not compatible with block and blockcampaign options.
      *   Default: false.
+     *
+     *   refresh: Refresh banner after N seconds. This option is only supported
+     *   in IFrame tag.
+     *
+     *   resize: (Boolean) Resize IFrame to banner dimensions. This option is only
+     *   supported in IFrame tag.
+     *
+     *   allowtransparent: (Boolean) Make the IFrame transparent. This option
+     *   is only supported in IFrame tag.
+     *
+     *   width: Width of banner zone. Required for IFrame tag type.
+     *
+     *   height: Height of banner zone. Required for IFrame tag type.
      *
      *   extra: An object of your own extra key-value pairs to pass to OpenX
      *   for targeting or custom functionality.

@@ -72,6 +72,15 @@ $('.banner').openxtag('spc', function () {
 });
 ```
 
+Load ads using iFrame tag. Width and height parameters are required.
+
+```javascript
+$('.banner').openxtag('iframe', 1, {
+    width: 240,
+    height: 400
+});
+```
+
 Also see sample HTML pages in examples/
 
 TODO
