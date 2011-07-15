@@ -10,6 +10,7 @@ DIST_DIR = ${PREFIX}/dist
 
 JS_ENGINE ?= `which node nodejs`
 COMPILER = ${JS_ENGINE} ${BUILD_DIR}/uglify.js --unsafe
+CLOSURE_COMPILER = java -jar ~/Applications/closure-compiler/compiler.jar
 
 BASE_FILES = ${SRC_DIR}/jquery.openxtag.js
 
@@ -17,6 +18,7 @@ MODULES = ${BASE_FILES}
 
 JQ = ${DIST_DIR}/jquery.openxtag.js
 JQ_MIN = ${DIST_DIR}/jquery.openxtag.min.js
+JQ_CC = ${DIST_DIR}/jquery.openxtag.cc.js
 
 JQ_VER = $(shell cat version.txt)
 VER = sed "s/@VERSION/${JQ_VER}/"
@@ -31,7 +33,7 @@ core: jquery min lint
 
 ${DIST_DIR}:
 	@@mkdir -p ${DIST_DIR}
-	@@cp -r README examples ${DIST_DIR}
+	@@cp -r README.md examples ${DIST_DIR}
 
 jquery: ${JQ}
 
@@ -56,7 +58,7 @@ lint: jquery
 		echo "You must have NodeJS installed in order to test plugin against JSLint."; \
 	fi
 
-min: jquery ${JQ_MIN}
+min: jquery ${JQ_MIN} ${JQ_CC}
 
 ${JQ_MIN}: ${JQ}
 	@@if test ! -z ${JS_ENGINE}; then \
@@ -66,6 +68,11 @@ ${JQ_MIN}: ${JQ}
 		echo "You must have NodeJS installed in order to minify plugin."; \
 	fi
 	
+${JQ_CC}: ${JQ}
+	@@echo "Closure compiling plugin" ${JQ_CC}; \
+	${CLOSURE_COMPILER} --compilation_level ADVANCED_OPTIMIZATIONS --js ${JQ} \
+	--externs examples/jquery-1.6.2rc1-ab1504f.min.js --externs examples/jquery.metadata.js \
+	--warning_level QUIET > ${JQ_CC};
 
 clean:
 	@@echo "Removing Distribution directory:" ${DIST_DIR} ${TGZ} ${TGZ}.tar.gz

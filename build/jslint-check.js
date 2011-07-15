@@ -21,7 +21,7 @@ var e = JSLINT.errors, found = 0, w;
 for ( var i = 0; i < e.length; i++ ) {
 	w = e[i];
 
-	if ( !ok[ w.reason ] ) {
+	if ( !ok[ w.reason ] && !w.reason.match(/is better written in dot notation\./)) {
 		found++;
 		print( "\n" + w.evidence + "\n" );
 		print( "    Problem at line " + w.line + " character " + w.character + ": " + w.reason );

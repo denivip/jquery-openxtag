@@ -15,23 +15,27 @@
 
 (function ($) {
 
+    // NOTE Use strings instead of symbolic names if that name will be used
+    // externally. It is needed to preserve the name after closure compiler
+    // advanced optimization
+
     var _loopIterations = 10;
 
     var defaults = {
-        jsPrefix: 'OA_',
-        swfObjectJS: 'fl.js',
-        delivery: null,
-        deliverySSL: null,
-        jsTagScript: 'ajs.php',
-        spcTagScript: 'spc.php',
-        charset: 'UTF-8',
-        zoneID: null,
-        target: undefined,
-        source: undefined,
-        blockcampaign: undefined, // bool option
-        block: undefined, // bool option
-        forceAsync: false, // not compatible with block(campaign) parameters
-        extra: undefined // object of key-value pairs for custom parameters
+        'jsPrefix': 'OA_',
+        'swfObjectJS': 'fl.js',
+        'delivery': null,
+        'deliverySSL': null,
+        'jsTagScript': 'ajs.php',
+        'spcTagScript': 'spc.php',
+        'charset': 'UTF-8',
+        'zoneID': null,
+        'target': undefined,
+        'source': undefined,
+        'blockcampaign': undefined, // bool option
+        'block': undefined, // bool option
+        'forceAsync': false, // not compatible with block(campaign) parameters
+        'extra': undefined // object of key-value pairs for custom parameters
     };
 
     var init = function (options) {
@@ -88,7 +92,7 @@
 
         var settings = $.extend(defaults, options);
         if (zoneID != null) {
-            settings.zoneID = zoneID;
+            settings['zoneID'] = zoneID;
         }
 
         return func.apply(this, [zoneID, settings, success]);
@@ -101,12 +105,12 @@
         // check for required parameters
 
         if (location.protocol == 'https:') {
-            if (typeof settings.deliverySSL != 'string') {
+            if (typeof settings['deliverySSL'] != 'string') {
                 $.error('please set "deliverySSL" option for openxtag');
             }
         }
         else {
-            if (typeof settings.delivery != 'string') {
+            if (typeof settings['delivery'] != 'string') {
                 $.error('please set "delivery" option for openxtag');
             }
         }
@@ -116,23 +120,23 @@
     // {{{ function _buildStandardRequestParameters() { ... }
     function _buildStandardRequestParameters(settings) {
         var data = {
-            charset: settings.charset,
-            target: settings.target,
-            source: settings.source,
-            extra: settings.extra,
-            loc: window.location.href
+            'charset': settings['charset'],
+            'target': settings['target'],
+            'source': settings['source'],
+            'extra': settings['extra'],
+            'loc': window.location.href
         };
 
-        if (typeof settings.block != 'undefined') {
-            data.block = settings.block ? 1 : 0;
+        if (typeof settings['block'] != 'undefined') {
+            data['block'] = settings['block'] ? 1 : 0;
         }
 
-        if (typeof settings.blockcampaign != 'undefined') {
-            data.blockcampaign = settings.blockcampaign ? 1 : 0;
+        if (typeof settings['blockcampaign'] != 'undefined') {
+            data['blockcampaign'] = settings['blockcampaign'] ? 1 : 0;
         }
 
         if (document.referrer) {
-            data.referer = document.referrer;
+            data['referer'] = document.referrer;
         }
 
         return data;
@@ -152,36 +156,36 @@
 
             _validateSettings(thesettings);
 
-            var zoneID = thesettings.zoneID;
+            var zoneID = thesettings['zoneID'];
             if (zoneID == null) {
                 $.error('please set "zoneID" option for openxtag jsZone');
             }
 
             var data = _buildStandardRequestParameters(thesettings);
-            data.zoneid = zoneID;
-            data.cb = Math.floor(Math.random()*99999999999);
+            data['zoneid'] = zoneID;
+            data['cb'] = Math.floor(Math.random()*99999999999);
 
             // only needed for OpenX < 2.4
-            if (!document.MAX_used) {
-                document.MAX_used = ',';
+            if (!document['MAX_used']) {
+                document['MAX_used'] = ',';
             }
-            if (document.MAX_used != ',') {
-                data.exclude = document.MAX_used;
+            if (document['MAX_used'] != ',') {
+                data['exclude'] = document['MAX_used'];
             }
 
             if (document.context) {
-                data.context = document.context;
+                data['context'] = document.context;
             }
             if (document.mmm_fo) {
-                data.mmm_fo = 1;
+                data['mmm_fo'] = 1;
             }
 
-            var scriptURL = (location.protocol == 'https:' ? thesettings.deliverySSL : thesettings.delivery) + '/' + thesettings.jsTagScript;
+            var scriptURL = (location.protocol == 'https:' ? thesettings['deliverySSL'] : thesettings['delivery']) + '/' + thesettings['jsTagScript'];
             $.ajax({
                 url: scriptURL,
                 data: data,
                 dataType: 'html',
-                async: thesettings.forceAsync, // should be disabled for block(campaign)
+                async: thesettings['forceAsync'], // should be disabled for block(campaign)
                 success: function (data) {
                     _documentWriteSafeAppend('<script type="text/javascript">' + data + '</script>', $this);
                 }
@@ -210,14 +214,14 @@
                 thesettings = $.extend(thesettings, $this.metadata());
             }
 
-            var zoneID = thesettings.zoneID;
+            var zoneID = thesettings['zoneID'];
             if (zoneID == null) {
                 $.error('please set "zoneID" option for openxtag jsZone');
             }
 
             var zoneName = 'z' + i;
             zones[zoneName] = zoneID;
-            $this.data('openxtag', { zoneName: zoneName });
+            $this.data('openxtag', { 'zn': zoneName });
 
             i++;
         });
@@ -226,24 +230,24 @@
         _validateSettings(thesettings);
 
         var data = _buildStandardRequestParameters(thesettings);
-        data.zones = Object.keys(zones).map(function (key) { return key + '=' + zones[key]; }).join('|');
-        data.nz = 1; // named zones
-        data.r = Math.floor(Math.random()*99999999999);
+        data['zones'] = Object.keys(zones).map(function (key) { return key + '=' + zones[key]; }).join('|');
+        data['nz'] = 1; // named zones
+        data['r'] = Math.floor(Math.random()*99999999999);
 
-        var scriptURL = (location.protocol == 'https:' ? thesettings.deliverySSL : thesettings.delivery) + '/' + thesettings.spcTagScript;
+        var scriptURL = (location.protocol == 'https:' ? thesettings['deliverySSL'] : thesettings['delivery']) + '/' + thesettings['spcTagScript'];
         var that = this;
         $.ajax({
             url: scriptURL,
             data: data,
             dataType: 'html',
-            async: thesettings.forceAsync, // should be disabled for block(campaign)
+            async: thesettings['forceAsync'], // should be disabled for block(campaign)
             success: function (data) {
-                var flJsURL = (location.protocol == 'https:' ? thesettings.deliverySSL : thesettings.delivery) + '/' + thesettings.swfObjectJS;
+                var flJsURL = (location.protocol == 'https:' ? thesettings['deliverySSL'] : thesettings['delivery']) + '/' + thesettings['swfObjectJS'];
                 $.getScript(flJsURL, function () {
-                    var output = eval('(function () {' + data + ';return ' + thesettings.jsPrefix + 'output;})()');
+                    var output = eval('(function () {' + data + ';return ' + thesettings['jsPrefix'] + 'output;})()');
                     that.each(function () {
                         var $this = $(this);
-                        _documentWriteSafeAppend(output[$this.data('openxtag').zoneName], $this);
+                        _documentWriteSafeAppend(output[$this.data('openxtag')['zn']], $this);
                     });
                 });
             }
@@ -254,9 +258,9 @@
     /// }}} spcTag
 
     var fnMethods = {
-        zone: jsZone,
-        jsZone: jsZone,
-        spc: spcTag
+        'zone': jsZone,
+        'jsZone': jsZone,
+        'spc': spcTag
     };
 
     // {{{ function $.fn.openxtag(method) { ... }
@@ -282,17 +286,19 @@
      * @cat Plugins/OpenXTag
      * @see http://www.openx.org/docs/tutorials/comparisons-between-invocation-tags types of OpenX ad invocation tags
      */
-    $.fn.openxtag = function (method) {
-        if (fnMethods[method]) {
-            return _genericZoneCall.apply(this, [ fnMethods[method] ].concat(Array.prototype.slice.call(arguments, 1)));
-        } else {
-            $.error('Method ' +  method + ' does not exist on jQuery.openxtag');
-        }    
-    };
+    $.fn.extend({
+        'openxtag': function (method) {
+            if (fnMethods[method]) {
+                return _genericZoneCall.apply(this, [ fnMethods[method] ].concat(Array.prototype.slice.call(arguments, 1)));
+            } else {
+                $.error('Method ' +  method + ' does not exist on jQuery.openxtag');
+            }
+        }
+    });
     // }}} $.fn.openxtag
 
     var methods = {
-        init: init
+        'init': init
     };
 
     // {{{ function $.openxtag(method) { ... }
@@ -360,15 +366,17 @@
      * @type undefined
      * @see http://www.openx.org/docs/2.8/userguide/zone%20invocation
      */
-    $.openxtag = function (method) {
-        if (methods[method]) {
-            return methods[method].apply(this, Array.prototype.slice.call(arguments, 1));
-        } else if (typeof method === 'object' || !method) {
-            return methods.init.apply(this, arguments);
-        } else {
-            $.error('Method ' +  method + ' does not exist on jQuery.openxtag');
-        }    
-    };
+    $.extend({
+        'openxtag': function (method) {
+            if (methods[method]) {
+                return methods[method].apply(this, Array.prototype.slice.call(arguments, 1));
+            } else if (typeof method === 'object' || !method) {
+                return methods.init.apply(this, arguments);
+            } else {
+                $.error('Method ' +  method + ' does not exist on jQuery.openxtag');
+            }
+        }
+    });
     // }}} $.openxtag
 
 })(jQuery);
