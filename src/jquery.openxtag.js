@@ -304,7 +304,7 @@
         _validateSettings(thesettings);
 
         var data = _buildStandardRequestParameters(thesettings);
-        data['zones'] = Object.keys(zones).map(function (key) { return key + '=' + zones[key]; }).join('|');
+        data['zones'] = $.map(zones, function (id, name) { return name + '=' + id; }).join('|');
         data['nz'] = 1; // named zones
         data['r'] = Math.floor(Math.random()*99999999999);
 

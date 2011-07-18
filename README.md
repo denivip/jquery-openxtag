@@ -83,6 +83,12 @@ $('.banner').openxtag('iframe', 1, {
 
 Also see sample HTML pages in examples/
 
+Requirements
+------------
+
+ * jQuery 1.6+
+ * jQuery Metadata plugin is only required if you want to use its functionality
+
 TODO
 ----
 
