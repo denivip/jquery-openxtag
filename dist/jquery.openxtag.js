@@ -4,7 +4,7 @@
  * Tested with OpenX Community Edition 2.8.8-rc6
  *
  * @version 1.1
- * @date Fri Jul 15 14:27:52 2011 +0400
+ * @date Wed Aug 3 00:21:14 2011 +0400
  * @requires jQuery
  * @url http://plugins.jquery.com/project/openxtag
  *
@@ -131,9 +131,12 @@
             'charset': settings['charset'],
             'target': settings['target'],
             'source': settings['source'],
-            'extra': settings['extra'],
             'loc': window.location.href
         };
+
+        if (typeof settings['extra'] != 'undefined') {
+            data = $.extend(data, settings['extra']);
+        }
 
         if (typeof settings['block'] != 'undefined') {
             data['block'] = settings['block'] ? 1 : 0;
@@ -304,20 +307,21 @@
         _validateSettings(thesettings);
 
         var data = _buildStandardRequestParameters(thesettings);
-        data['zones'] = Object.keys(zones).map(function (key) { return key + '=' + zones[key]; }).join('|');
+        data['zones'] = $.map(zones, function (id, name) { return name + '=' + id; }).join('|');
         data['nz'] = 1; // named zones
-        data['r'] = Math.floor(Math.random()*99999999999);
 
         var scriptURL = (location.protocol == 'https:' ? thesettings['deliverySSL'] : thesettings['delivery']) + '/' + thesettings['spcTagScript'];
         var that = this;
         $.ajax({
             url: scriptURL,
             data: data,
-            dataType: 'html',
-            async: thesettings['forceAsync'], // should be disabled for block(campaign)
+            dataType: 'script',
             success: function (data) {
-                var flJsURL = (location.protocol == 'https:' ? thesettings['deliverySSL'] : thesettings['delivery']) + '/' + thesettings['swfObjectJS'];
-                $.getScript(flJsURL, function () {
+                loadFlashObjectOnce(thesettings, function () {
+                    // do eval here to work around potential problems when two
+                    // requests are run in parallel and one OA_output
+                    // overwrites another OA_output in global context
+
                     var output = eval('(function () {' + data + ';return ' + thesettings['jsPrefix'] + 'output;})()');
                     that.each(function () {
                         var $this = $(this);
@@ -330,6 +334,18 @@
         return chainObj;
     };
     /// }}} spcTag
+
+    function loadFlashObjectOnce(thesettings, callback) {
+        if (typeof window['org'] != 'undefined' && 
+            typeof window['org']['openx'] != 'undefined' && 
+            typeof window['org']['openx']['SWFObject'] != 'undefined') {
+            callback();
+        }
+        else {
+            var flJsURL = (location.protocol == 'https:' ? thesettings['deliverySSL'] : thesettings['delivery']) + '/' + thesettings['swfObjectJS'];
+            $.getScript(flJsURL, callback);
+        }
+    }
 
     var fnMethods = {
         'zone': jsZone,
