@@ -306,18 +306,21 @@
         var data = _buildStandardRequestParameters(thesettings);
         data['zones'] = $.map(zones, function (id, name) { return name + '=' + id; }).join('|');
         data['nz'] = 1; // named zones
-        data['r'] = Math.floor(Math.random()*99999999999);
 
         var scriptURL = (location.protocol == 'https:' ? thesettings['deliverySSL'] : thesettings['delivery']) + '/' + thesettings['spcTagScript'];
         var that = this;
         $.ajax({
             url: scriptURL,
             data: data,
-            dataType: 'html',
-            async: thesettings['forceAsync'], // should be disabled for block(campaign)
+            dataType: 'script',
             success: function (data) {
                 var flJsURL = (location.protocol == 'https:' ? thesettings['deliverySSL'] : thesettings['delivery']) + '/' + thesettings['swfObjectJS'];
                 $.getScript(flJsURL, function () {
+
+                    // do eval here to work around potential problems when two
+                    // requests are run in parallel and one OA_output
+                    // overwrites another OA_output in global context
+
                     var output = eval('(function () {' + data + ';return ' + thesettings['jsPrefix'] + 'output;})()');
                     that.each(function () {
                         var $this = $(this);

@@ -92,7 +92,7 @@ Requirements
 TODO
 ----
 
- * FIX cross-site xhr
+ * fix cross-site xhr
  * add documentation on plugins.jquery.com
  * add test suite
  * remove callback, add event on ad load
@@ -103,12 +103,15 @@ TODO
 Known issues
 ------------
 
-The plugin send requests to OpenX server using XHR. Because of that cross-site
-requests may not work due to same-origin policy. Possible workarounds are: 
+The plugin sends js tag requests to OpenX server using XHR. Because of that
+cross-site requests may not work due to same-origin policy. Possible
+workarounds are:
 
+ * Use iframe or spc type tags. SPC (Single Page Call) is recommended.
  * Setup server-side XHR proxy on same domain that your ad tag requests
    originate from.
- * Use iFrame type tags.
  * Add Access-Control-Allow-Origin response header in your OpenX web server
    configuration (not all browsers support this header).
+
+When you work with OpenX, don't forget to disable AdBlock.
 
