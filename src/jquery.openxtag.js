@@ -314,9 +314,7 @@
             data: data,
             dataType: 'script',
             success: function (data) {
-                var flJsURL = (location.protocol == 'https:' ? thesettings['deliverySSL'] : thesettings['delivery']) + '/' + thesettings['swfObjectJS'];
-                $.getScript(flJsURL, function () {
-
+                loadFlashObjectOnce(thesettings, function () {
                     // do eval here to work around potential problems when two
                     // requests are run in parallel and one OA_output
                     // overwrites another OA_output in global context
@@ -333,6 +331,18 @@
         return chainObj;
     };
     /// }}} spcTag
+
+    function loadFlashObjectOnce(thesettings, callback) {
+        if (typeof window['org'] != 'undefined' && 
+            typeof window['org']['openx'] != 'undefined' && 
+            typeof window['org']['openx']['SWFObject'] != 'undefined') {
+            callback();
+        }
+        else {
+            var flJsURL = (location.protocol == 'https:' ? thesettings['deliverySSL'] : thesettings['delivery']) + '/' + thesettings['swfObjectJS'];
+            $.getScript(flJsURL, callback);
+        }
+    }
 
     var fnMethods = {
         'zone': jsZone,
