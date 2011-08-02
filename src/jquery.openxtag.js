@@ -131,9 +131,12 @@
             'charset': settings['charset'],
             'target': settings['target'],
             'source': settings['source'],
-            'extra': settings['extra'],
             'loc': window.location.href
         };
+
+        if (typeof settings['extra'] != 'undefined') {
+            data = $.extend(data, settings['extra']);
+        }
 
         if (typeof settings['block'] != 'undefined') {
             data['block'] = settings['block'] ? 1 : 0;
