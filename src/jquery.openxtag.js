@@ -50,8 +50,8 @@
         defaults = $.extend(defaults, options);
     };
 
-    // {{{ function _documentWriteSafeAppend(markup, $this) { ... }
-    function _documentWriteSafeAppend(markup, $this) {
+    // {{{ function _documentWriteSafeAppend(markup, $this, success) { ... }
+    function _documentWriteSafeAppend(markup, $this, success) {
         var cnt = 0; // prevent infinite loops
         (function (markup) {
             if (markup.match(/document\.write|<script/)) {
@@ -206,7 +206,7 @@
                 dataType: 'html',
                 async: thesettings['forceAsync'], // should be disabled for block(campaign)
                 success: function (data) {
-                    _documentWriteSafeAppend('<script type="text/javascript">' + data + '</script>', $this);
+                    _documentWriteSafeAppend('<script type="text/javascript">' + data + '</script>', $this, success);
                 }
             });
         });
@@ -325,7 +325,7 @@
                     var output = eval('(function () {' + data + ';return ' + thesettings['jsPrefix'] + 'output;})()');
                     that.each(function () {
                         var $this = $(this);
-                        _documentWriteSafeAppend(output[$this.data('openxtag')['zn']], $this);
+                        _documentWriteSafeAppend(output[$this.data('openxtag')['zn']], $this, success);
                     });
                 });
             }
