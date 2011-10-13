@@ -73,7 +73,7 @@
             else {
                 $this.append(markup);
                 if (typeof success == 'function') {
-                    setTimeout(success, 0);
+                    setTimeout(function () { success.call($this); }, 0);
                 }
             }
         })(markup);
