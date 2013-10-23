@@ -99,6 +99,7 @@ TODO
  * provide examples with banner reload on timeout
  * experiment with ad delivery over websockets
  * implement direct selection
+ * add option to disable async processing for certain zones
 
 Known issues
 ------------
@@ -112,6 +113,10 @@ workarounds are:
    originate from.
  * Add Access-Control-Allow-Origin response header in your OpenX web server
    configuration (not all browsers support this header).
+
+The plugin may not display custom HTML ads properly if their code contains
+complex JavaScript which depends on asynchronous calls to document.write or
+asynchronous script tag insertions.
 
 When you work with OpenX, don't forget to disable AdBlock.
 
