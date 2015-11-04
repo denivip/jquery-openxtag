@@ -98,7 +98,7 @@
             options = null;
         }
 
-        var settings = $.extend(defaults, options);
+        var settings = $.extend({}, defaults, options);
         if (zoneID != null) {
             settings['zoneID'] = zoneID;
         }
